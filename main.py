@@ -1,8 +1,8 @@
 import os
 import streamlit as st
 from streamlit_option_menu import option_menu
-from pages.dialogue import dialogue_page
-# from pages.prompt_base2 import prompt_base_page
+from web_pages.dialogue import dialogue_page
+# from web_pages.prompt_base2 import prompt_base_page
 
 st.set_page_config(layout="wide")
 

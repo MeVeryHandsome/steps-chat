@@ -1,4 +1,4 @@
-from pages.dialogue import call_with_messages, data, call_with_stream
+from web_pages.dialogue import call_with_messages, data, call_with_stream
 prompt_list = list(data.values())
 length = len(prompt_list)
 if length > 1:
