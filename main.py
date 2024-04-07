@@ -20,7 +20,7 @@ icons = [x["icon"] for x in all_pages.values()]
 
 VERSION = "0.1-beta"
 with st.sidebar:
-    col1, col2 = st.columns([0.3, 0.7])
+    col1, col_empty, col2 = st.columns([0.35, 0.05, 0.6])
     with col1:
         st.image(os.path.join("img", "logo-xchat.png"), width=50, use_column_width=True)
     with col2:
@@ -31,4 +31,3 @@ with st.sidebar:
 
 if selected_page in all_pages:
     all_pages[selected_page]["func"]()
-

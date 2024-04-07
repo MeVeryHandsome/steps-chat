@@ -69,21 +69,21 @@ def answer_by_steps(user_input):
         chat_box.update_msg(message, streaming=False)
         return
     if length > 1:
-        chain_of_thought(prompt_list)
+        chain_of_thought(prompt_list, user_input)
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
-        for r in call_with_stream(only_one):
+        for r in call_with_stream(only_one.format(question=user_input)):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
         chat_box.update_msg(full_content, streaming=False)
         return
 
 
-def chain_of_thought(prompt_list):
+def chain_of_thought(prompt_list, user_input):
     first = prompt_list.pop(0)
     last = prompt_list.pop(-1)
-    result = call_with_messages(first)
+    result = call_with_messages(first.format(question=user_input))
     print(f"-----------第1次结果:\n{result}")
     for index, prompt in enumerate(prompt_list):
         final_prompt = prompt.format(question=result)
