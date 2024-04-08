@@ -1,4 +1,3 @@
-from http import HTTPStatus
 from zhipuai import ZhipuAI
 
 client = ZhipuAI(api_key="717695f1a8c48ea6ed30d9408157abc3.j0cBmnWCyPho4EuK")

@@ -1,7 +1,6 @@
 import os
-import uuid
 from datetime import datetime
-# from qwen_agent import call_with_stream, call_with_messages
+# from agent.qwen_agent import call_with_stream, call_with_messages
 from agent.glm_agent import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
@@ -23,8 +22,6 @@ def dialogue_page():
     # 创建对话区域和输入区域
     st.title('大模型对话')
 
-    # conversation_id = get_conversation_id()
-
     greeting()
 
     chat_input_placeholder = "请输入对话内容，换行请使用Shift+Enter。输入/help查看自定义命令 "
@@ -35,26 +32,17 @@ def dialogue_page():
     extra_btn()
 
 
-def get_conversation_id():
-    st.session_state.setdefault("conversation_ids", {})
-    st.session_state["conversation_ids"].setdefault(chat_box.cur_chat_name, uuid.uuid4().hex)
-    with st.sidebar:
-        # 多会话
-        conv_names = list(st.session_state["conversation_ids"].keys())
-        index = 0
-        if st.session_state.get("cur_conv_name") in conv_names:
-            index = conv_names.index(st.session_state.get("cur_conv_name"))
-        conversation_name = st.selectbox("当前会话：", conv_names, index=index)
-        chat_box.use_chat_name(conversation_name)
-        conversation_id = st.session_state["conversation_ids"][conversation_name]
-    return conversation_id
-
 def greeting():
-    default_model = "Qwen-turbo"
+    if call_with_messages.__module__ == "agent.glm_agent":
+        model_name = "GLM-4"
+    elif call_with_messages.__module__ == "agent.qwen_agent":
+        model_name = "Qwen-turbo"
+    else:
+        model_name = "XChat"
     if not chat_box.chat_inited:
         st.toast(
             f"欢迎使用汽车任务规划系统! \n\n"
-            f"当前运行的模型`{default_model}`, 您可以开始提问了."
+            f"当前运行的模型`{model_name}`, 您可以开始提问了."
         )
         chat_box.init_session()
 
