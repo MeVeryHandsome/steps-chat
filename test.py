@@ -1,4 +1,6 @@
-from web_pages.dialogue import call_with_messages, data, call_with_stream
+# from qwen_agent import call_with_messages, call_with_stream
+from agent.glm_agent import call_with_messages, call_with_stream
+from web_pages.dialogue import data
 prompt_list = list(data.values())
 length = len(prompt_list)
 if length > 1:

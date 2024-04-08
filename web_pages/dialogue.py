@@ -1,7 +1,8 @@
 import os
 import uuid
 from datetime import datetime
-from utils import call_with_stream, call_with_messages
+# from qwen_agent import call_with_stream, call_with_messages
+from agent.glm_agent import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
 import yaml
