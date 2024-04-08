@@ -875,9 +875,9 @@ prompts:
     Slot1.1：None；
     }}
     
-    不要复述问题，不要有任何多余的回复，严格按照markdown的json格式要求开始回答。
     输入：{question}
     输出：
+    不要复述问题，不要有任何多余的回复，严格按照markdown的json格式要求开始回答。
 
 
 
