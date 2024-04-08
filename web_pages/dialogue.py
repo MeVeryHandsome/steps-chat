@@ -46,6 +46,8 @@ def greeting():
             f"当前运行的模型`{model_name}`, 您可以开始提问了."
         )
         chat_box.init_session()
+    chat_box.output_messages()
+
 
 
 def answer_by_steps(user_input):
