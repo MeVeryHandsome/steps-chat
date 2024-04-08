@@ -7,8 +7,8 @@ from web_pages.dialogue import dialogue_page
 st.set_page_config(layout="wide")
 
 all_pages = {
-    "新建对话": {
-        "icon": "chat",
+    "系统主界面": {
+        "icon": "car-front-fill",
         "func": dialogue_page,
     },
     # "提示词管理": {
@@ -18,14 +18,11 @@ all_pages = {
 }
 icons = [x["icon"] for x in all_pages.values()]
 
-VERSION = "0.1-beta"
+VERSION = "Beta"
 with st.sidebar:
-    col1, col_empty, col2 = st.columns([0.35, 0.05, 0.6])
-    with col1:
-        st.image(os.path.join("img", "logo-xchat.png"), width=50, use_column_width=True)
-    with col2:
-        st.write("")  # 这个空写操作是为了使按钮与文本区域垂直对齐
-        st.caption("汽车任务规划", unsafe_allow_html=True)
+    col1, col_center, col2 = st.columns([0.2, 0.6, 0.2])
+    with col_center:
+        st.image(os.path.join("img", "car-logo.png"), use_column_width=True)
     st.caption(f"""<p align="right">当前版本：{VERSION}</p>""", unsafe_allow_html=True)
     selected_page = option_menu("", options=list(all_pages), icons=icons, default_index=0)
 

@@ -21,7 +21,7 @@ chat_box = ChatBox(
 
 def dialogue_page():
     # 创建对话区域和输入区域
-    st.title('大模型对话')
+    st.title('汽车语音交互系统Demo')
 
     greeting()
 
@@ -59,7 +59,7 @@ def answer_by_steps(user_input):
         chat_box.update_msg(message, streaming=False)
         return
     if length > 1:
-        chain_of_thought(prompt_list, user_input, length)
+        chain_of_thought(prompt_list, user_input)
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
@@ -70,23 +70,18 @@ def answer_by_steps(user_input):
         return
 
 
-def chain_of_thought(prompt_list, user_input, length):
+def chain_of_thought(prompt_list, user_input):
     first = prompt_list.pop(0)
     last = prompt_list.pop(-1)
-    if length == 2:
-        chat_box.ai_say([Markdown("进行中...", in_expander=True,
-                             expanded=True, title="意图识别"),
-                         Markdown("等待中...", in_expander=True,
-                                  expanded=False, title="调用指令")
-                         ])
-    else:
-        chat_box.ai_say([Markdown("进行中...", in_expander=True,
-                             expanded=True, title="意图识别"),
-                         Markdown("等待中...", in_expander=True,
-                                  expanded=False, title="步骤拆解"),
-                         Markdown("等待中...", in_expander=True,
-                                  expanded=False, title="调用指令")
-                         ])
+    chat_box.ai_say([Markdown("进行中...", in_expander=True,
+                         expanded=True, title="意图分析和系统分发"),
+                     Markdown("等待中...", in_expander=True,
+                              expanded=False, title="模块分发"),
+                     Markdown("等待中...", in_expander=True,
+                              expanded=False, title="功能分发"),
+                     Markdown("等待中...", in_expander=True,
+                              expanded=False, title="代码生成")
+                     ])
     # 第一次调用
     result = call_with_messages(first.format(question=user_input))
     chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
@@ -97,8 +92,9 @@ def chain_of_thought(prompt_list, user_input, length):
     for index, prompt in enumerate(prompt_list):
         final_prompt = prompt.format(question=result)
         result = call_with_messages(final_prompt)
-        chat_box.update_msg(element_index=0, streaming=False, expanded=False)
-        chat_box.update_msg(result, element_index=1, streaming=False, expanded=True)
+        chat_box.update_msg(element_index=index, streaming=False, expanded=False, state="complete")
+        chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
+        chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
         print(f"-----------第{index + 2}次结果:\n{result}")
     full_content = ''  # with incrementally we need to merge output.
     prev_expanded = True
@@ -115,16 +111,16 @@ def chain_of_thought(prompt_list, user_input, length):
 def extra_btn():
     now = datetime.now()
     with st.sidebar:
-        cols = st.columns(2)
-        export_btn = cols[0]
-        if cols[1].button(
-                ":wastebasket: 清空",
+        new_btn = st.container()
+        export_btn = st.container()
+        if new_btn.button(
+                ":speech_balloon: 新建对话",
                 use_container_width=True,
         ):
             chat_box.reset_history()
             st.rerun()
     export_btn.download_button(
-        ":file_folder: 导出",
+        ":file_folder: 导出记录",
         "".join(chat_box.export2md()),
         file_name=f"{now:%Y-%m-%d %H.%M}_对话记录.md",
         mime="text/markdown",
