@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
-# from agent.fake_llm import call_with_stream, call_with_messages
 # from agent.qwen_agent import call_with_stream, call_with_messages
 from agent.glm_agent import call_with_stream, call_with_messages
+# from agent.fake_llm import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
 import yaml
@@ -52,7 +52,6 @@ def greeting():
 def answer_by_steps(user_input):
     chat_box.reset_history()
     chat_box.user_say(user_input)
-    chat_box.ai_say("正在思考...")
     prompt_list = list(data.values())
     length = len(prompt_list)
     if length == 0:
@@ -60,7 +59,7 @@ def answer_by_steps(user_input):
         chat_box.update_msg(message, streaming=False)
         return
     if length > 1:
-        chain_of_thought(prompt_list, user_input)
+        chain_of_thought(prompt_list, user_input, length)
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
@@ -71,20 +70,45 @@ def answer_by_steps(user_input):
         return
 
 
-def chain_of_thought(prompt_list, user_input):
+def chain_of_thought(prompt_list, user_input, length):
     first = prompt_list.pop(0)
     last = prompt_list.pop(-1)
+    if length == 2:
+        chat_box.ai_say([Markdown("进行中...", in_expander=True,
+                             expanded=True, title="意图识别"),
+                         Markdown("等待中...", in_expander=True,
+                                  expanded=False, title="调用指令")
+                         ])
+    else:
+        chat_box.ai_say([Markdown("进行中...", in_expander=True,
+                             expanded=True, title="意图识别"),
+                         Markdown("等待中...", in_expander=True,
+                                  expanded=False, title="步骤拆解"),
+                         Markdown("等待中...", in_expander=True,
+                                  expanded=False, title="调用指令")
+                         ])
+    # 第一次调用
     result = call_with_messages(first.format(question=user_input))
+    chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
+    chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
     print(f"-----------第1次结果:\n{result}")
+
+    # 中间过程
     for index, prompt in enumerate(prompt_list):
         final_prompt = prompt.format(question=result)
         result = call_with_messages(final_prompt)
+        chat_box.update_msg(element_index=0, streaming=False, expanded=False)
+        chat_box.update_msg(result, element_index=1, streaming=False, expanded=True)
         print(f"-----------第{index + 2}次结果:\n{result}")
     full_content = ''  # with incrementally we need to merge output.
+    prev_expanded = True
     for r in call_with_stream(last.format(question=result)):
         full_content += r
-        chat_box.update_msg(full_content, streaming=True)
-    chat_box.update_msg(full_content, streaming=False)
+        if prev_expanded:
+            chat_box.update_msg(element_index=-2, streaming=False, expanded=False, state="complete")
+        chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
+        prev_expanded = False
+    chat_box.update_msg(full_content, element_index=-1, streaming=False,  state="complete")
     print(f"-----------最后一次结果:\n{full_content}")
 
 
