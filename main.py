@@ -7,7 +7,7 @@ from web_pages.dialogue import dialogue_page
 st.set_page_config(layout="wide")
 
 all_pages = {
-    "大模型对话": {
+    "新建对话": {
         "icon": "chat",
         "func": dialogue_page,
     },
