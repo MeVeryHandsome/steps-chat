@@ -6,6 +6,7 @@ from web_pages.dialogue import dialogue_page
 
 st.set_page_config(layout="wide")
 
+# 页面切换
 all_pages = {
     "系统主界面": {
         "icon": "car-front-fill",
@@ -19,6 +20,8 @@ all_pages = {
 icons = [x["icon"] for x in all_pages.values()]
 
 VERSION = "Beta"
+
+# 首页逻辑
 with st.sidebar:
     col1, col_center, col2 = st.columns([0.2, 0.6, 0.2])
     with col_center:

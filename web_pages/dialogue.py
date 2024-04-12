@@ -19,6 +19,7 @@ chat_box = ChatBox(
 )
 
 
+# 对话主界面逻辑
 def dialogue_page():
     # 创建对话区域和输入区域
     st.title('汽车语音交互系统Demo')
@@ -33,6 +34,7 @@ def dialogue_page():
     extra_btn()
 
 
+# 欢迎提示框
 def greeting():
     if call_with_messages.__module__ == "agent.glm_agent":
         model_name = "GLM-4"
@@ -49,6 +51,7 @@ def greeting():
     chat_box.output_messages()
 
 
+# 分步回答
 def answer_by_steps(user_input):
     chat_box.reset_history()
     chat_box.user_say(user_input)
@@ -70,6 +73,7 @@ def answer_by_steps(user_input):
         return
 
 
+# 思维链(目前分为四步）
 def chain_of_thought(prompt_list, user_input):
     first = prompt_list.pop(0)
     last = prompt_list.pop(-1)
@@ -96,6 +100,8 @@ def chain_of_thought(prompt_list, user_input):
         chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
         chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
         print(f"-----------第{index + 2}次结果:\n{result}")
+
+    # 最后一次流式回答
     full_content = ''  # with incrementally we need to merge output.
     prev_expanded = True
     for r in call_with_stream(last.format(question=result)):
@@ -108,17 +114,21 @@ def chain_of_thought(prompt_list, user_input):
     print(f"-----------最后一次结果:\n{full_content}")
 
 
+# 额外按钮（包括新建对话与导出记录）
 def extra_btn():
     now = datetime.now()
     with st.sidebar:
         new_btn = st.container()
         export_btn = st.container()
+        # 新建对话（删除历史记录，刷新页面）
         if new_btn.button(
                 ":speech_balloon: 新建对话",
                 use_container_width=True,
         ):
             chat_box.reset_history()
             st.rerun()
+
+    # 导出记录（下载chat_box导出的markdown内容）
     export_btn.download_button(
         ":file_folder: 导出记录",
         "".join(chat_box.export2md()),
