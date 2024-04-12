@@ -9,7 +9,9 @@ def call_with_messages(prompt):
     print("\n正在发起单次提问请求")
     response = client.chat.completions.create(
         model="glm-4",  # 填写需要调用的模型名称
-        messages=messages
+        messages=messages,
+        temperature=0.25,
+        max_tokens=8192
     )
     if response:
         return response.choices[0].message.content
@@ -23,9 +25,11 @@ def call_with_messages(prompt):
 def call_with_stream(prompt):
     messages = [{'role': 'user', 'content': prompt}]
     responses = client.chat.completions.create(
-        model="glm-4",  # 填写需要调用的模型名称
+        model="glm-4",
         messages=messages,
         stream=True,
+        temperature=0.05,
+        max_tokens=8192
     )
     print("\n正在发起流式回答请求")
     for response in responses:
@@ -38,3 +42,5 @@ def call_with_stream(prompt):
                 response.code, response.message
             ))
             return
+
+
