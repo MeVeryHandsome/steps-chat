@@ -1,6 +1,6 @@
 from zhipuai import ZhipuAI
 
-client = ZhipuAI(api_key="717695f1a8c48ea6ed30d9408157abc3.j0cBmnWCyPho4EuK")
+client = ZhipuAI(api_key="24ff451cc3f957641db8b3485156156b.Xj7jZ0h9SHYu9Klg")
 
 
 def call_with_messages(prompt):

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
-from agent.qwen_agent import call_with_stream, call_with_messages
-# from agent.glm_agent import call_with_stream, call_with_messages
+# from agent.qwen_agent import call_with_stream, call_with_messages
+from agent.glm_agent import call_with_stream, call_with_messages
 # from agent.fake_llm import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
@@ -26,7 +26,7 @@ def dialogue_page():
 
     greeting()
 
-    chat_input_placeholder = "请输入对话内容，换行请使用Shift+Enter。输入/help查看自定义命令 "
+    chat_input_placeholder = "请输入对话内容，换行请使用Shift+Enter。"
     # 当用户提交问题时的逻辑
     if user_input := st.chat_input(chat_input_placeholder, key="prompt"):
         answer_by_steps(user_input)
