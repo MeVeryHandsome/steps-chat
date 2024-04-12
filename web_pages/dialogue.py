@@ -39,7 +39,7 @@ def greeting():
     if call_with_messages.__module__ == "agent.glm_agent":
         model_name = "GLM-4"
     elif call_with_messages.__module__ == "agent.qwen_agent":
-        model_name = "Qwen-turbo"
+        model_name = "Qwen-Max"
     else:
         model_name = "XChat"
     if not chat_box.chat_inited:
