@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
-# from agent.qwen_agent import call_with_stream, call_with_messages
-from agent.glm_agent import call_with_stream, call_with_messages
+from agent.qwen_agent import call_with_stream, call_with_messages
+# from agent.glm_agent import call_with_stream, call_with_messages
 # from agent.fake_llm import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
@@ -78,7 +78,7 @@ def chain_of_thought(prompt_list, user_input):
     first = prompt_list.pop(0)
     last = prompt_list.pop(-1)
     chat_box.ai_say([Markdown("进行中...", in_expander=True,
-                         expanded=True, title="意图分析和系统分发"),
+                              expanded=True, title="意图分析和系统分发"),
                      Markdown("等待中...", in_expander=True,
                               expanded=False, title="模块分发"),
                      Markdown("等待中...", in_expander=True,
@@ -87,31 +87,42 @@ def chain_of_thought(prompt_list, user_input):
                               expanded=False, title="代码生成")
                      ])
     # 第一次调用
-    result = call_with_messages(first.format(question=user_input))
-    chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
-    chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
-    print(f"-----------第1次结果:\n{result}")
+    try:
+        result = call_with_messages(first.format(question=user_input))
+        chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
+        chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
+        print(f"-----------第1次结果:\n{result}")
+    except Exception as e:
+        print(e)
+        chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=0, streaming=False, state="error")
+        return
 
     # 中间过程
     for index, prompt in enumerate(prompt_list):
-        final_prompt = prompt.format(question=result)
-        result = call_with_messages(final_prompt)
-        chat_box.update_msg(element_index=index, streaming=False, expanded=False, state="complete")
-        chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
-        chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
-        print(f"-----------第{index + 2}次结果:\n{result}")
+        try:
+            actual_prompt = prompt.format(question=result)
+            result = call_with_messages(actual_prompt)
+            chat_box.update_msg(element_index=index, expanded=False)
+            chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
+            chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
+            print(f"-----------第{index + 2}次结果:\n{result}")
+        except Exception as e:
+            print(e)
+            chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=index + 1, streaming=False, state="error")
+            return
 
     # 最后一次流式回答
     full_content = ''  # with incrementally we need to merge output.
-    prev_expanded = True
-    for r in call_with_stream(last.format(question=result)):
-        full_content += r
-        if prev_expanded:
-            chat_box.update_msg(element_index=-2, streaming=False, expanded=False, state="complete")
-        chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
-        prev_expanded = False
-    chat_box.update_msg(full_content, element_index=-1, streaming=False,  state="complete")
-    print(f"-----------最后一次结果:\n{full_content}")
+    try:
+        for r in call_with_stream(last.format(question=result)):
+            full_content += r
+            chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
+        chat_box.update_msg(element_index=-2, expanded=False)
+        chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
+        print(f"-----------最后一次结果:\n{full_content}")
+    except Exception as e:
+        print(e)
+        chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1, streaming=False, state="error")
 
 
 # 额外按钮（包括新建对话与导出记录）
