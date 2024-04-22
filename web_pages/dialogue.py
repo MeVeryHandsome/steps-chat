@@ -75,54 +75,89 @@ def answer_by_steps(user_input):
 
 # 思维链(目前分为四步）
 def chain_of_thought(prompt_list, user_input):
-    first = prompt_list.pop(0)
-    last = prompt_list.pop(-1)
-    chat_box.ai_say([Markdown("进行中...", in_expander=True,
-                              expanded=True, title="意图分析和系统分发"),
-                     Markdown("等待中...", in_expander=True,
-                              expanded=False, title="模块分发"),
-                     Markdown("等待中...", in_expander=True,
-                              expanded=False, title="功能分发"),
-                     Markdown("等待中...", in_expander=True,
-                              expanded=False, title="代码生成")
-                     ])
+    first_prompt = prompt_list.pop(0)
+    last_prompt = prompt_list.pop(-1)
+    execution_failed = False
+    all_messages = init_all_steps()
+    if len(prompt_list) + 2 != len(all_messages):
+        chat_box.ai_say("提示词与思维链数量出错，请检查无误后重试")
+        return
+    chat_box.ai_say(all_messages)
     # 第一次调用
+    execution_failed, result = first_step(execution_failed, first_prompt, user_input)
+
+    # 中间过程
+    execution_failed, result = intermediate_steps(execution_failed, prompt_list, result)
+
+    # 最后一次流式回答
+    final_step(execution_failed, last_prompt, result)
+
+
+def final_step(execution_failed, last_prompt, result):
+    if execution_failed:
+        chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=-1, streaming=False,
+                            expanded=True, state="error")
+    else:
+        full_content = ''  # with incrementally we need to merge output.
+        try:
+            for r in call_with_stream(last_prompt.format(question=result)):
+                full_content += r
+                chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
+            chat_box.update_msg(element_index=-2, expanded=False)
+            chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
+            print(f"-----------最后一次结果:\n{full_content}")
+        except Exception as e:
+            print(e)
+            chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1,
+                                streaming=False, state="error")
+
+
+def intermediate_steps(execution_failed, prompt_list, result):
+    if execution_failed:
+        for index, prompt in enumerate(prompt_list):
+            chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=index + 1,
+                                streaming=False, expanded=True, state="error")
+    else:
+        for index, prompt in enumerate(prompt_list):
+            try:
+                actual_prompt = prompt.format(question=result)
+                result = call_with_messages(actual_prompt)
+                chat_box.update_msg(element_index=index, expanded=False)
+                chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
+                chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
+                print(f"-----------第{index + 2}次结果:\n{result}")
+            except Exception as e:
+                print(e)
+                chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=index + 1,
+                                    streaming=False, state="error")
+                execution_failed = True
+    return execution_failed, result
+
+
+def first_step(execution_failed, first_prompt, user_input):
     try:
-        result = call_with_messages(first.format(question=user_input))
+        result = call_with_messages(first_prompt.format(question=user_input))
         chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
         chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
         print(f"-----------第1次结果:\n{result}")
     except Exception as e:
         print(e)
         chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=0, streaming=False, state="error")
-        return
+        execution_failed = True
+    return execution_failed, result
 
-    # 中间过程
-    for index, prompt in enumerate(prompt_list):
-        try:
-            actual_prompt = prompt.format(question=result)
-            result = call_with_messages(actual_prompt)
-            chat_box.update_msg(element_index=index, expanded=False)
-            chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
-            chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
-            print(f"-----------第{index + 2}次结果:\n{result}")
-        except Exception as e:
-            print(e)
-            chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=index + 1, streaming=False, state="error")
-            return
 
-    # 最后一次流式回答
-    full_content = ''  # with incrementally we need to merge output.
-    try:
-        for r in call_with_stream(last.format(question=result)):
-            full_content += r
-            chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
-        chat_box.update_msg(element_index=-2, expanded=False)
-        chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
-        print(f"-----------最后一次结果:\n{full_content}")
-    except Exception as e:
-        print(e)
-        chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1, streaming=False, state="error")
+def init_all_steps():
+    intention_analyse = Markdown("进行中...", in_expander=True,
+                                 expanded=True, title="意图分析和系统分发")
+    module_distribution = Markdown("等待中...", in_expander=True,
+                                   expanded=False, title="模块分发")
+    function_distribution = Markdown("等待中...", in_expander=True,
+                                     expanded=False, title="功能分发")
+    code_generation = Markdown("等待中...", in_expander=True,
+                               expanded=False, title="代码生成")
+    all_messages = [intention_analyse, module_distribution, function_distribution, code_generation]
+    return all_messages
 
 
 # 额外按钮（包括新建对话与导出记录）
