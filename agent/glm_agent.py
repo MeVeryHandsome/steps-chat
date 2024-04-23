@@ -10,7 +10,7 @@ def call_with_messages(prompt):
     response = client.chat.completions.create(
         model="glm-4",  # 填写需要调用的模型名称
         messages=messages,
-        temperature=0.25,
+        temperature=0.15,
         max_tokens=8192
     )
     if response:

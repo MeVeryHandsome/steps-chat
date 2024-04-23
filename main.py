@@ -9,7 +9,7 @@ st.set_page_config(layout="wide")
 # 页面切换
 all_pages = {
     "系统主界面": {
-        "icon": "car-front-fill",
+        "icon": "chat",
         "func": dialogue_page,
     },
     # "提示词管理": {
@@ -25,7 +25,7 @@ VERSION = "Beta"
 with st.sidebar:
     col1, col_center, col2 = st.columns([0.2, 0.6, 0.2])
     with col_center:
-        st.image(os.path.join("img", "car-logo.png"), use_column_width=True)
+        st.image(os.path.join("img", "logo-xchat.png"), use_column_width=True)
     st.caption(f"""<p align="right">当前版本：{VERSION}</p>""", unsafe_allow_html=True)
     selected_page = option_menu("", options=list(all_pages), icons=icons, default_index=0)
 
