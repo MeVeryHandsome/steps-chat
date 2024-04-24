@@ -42,5 +42,3 @@ def call_with_stream(prompt):
                 response.code, response.message
             ))
             return
-
-

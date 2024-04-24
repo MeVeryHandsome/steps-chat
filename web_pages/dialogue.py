@@ -1,15 +1,8 @@
 import os
 from datetime import datetime
-# from agent.qwen_agent import call_with_stream, call_with_messages
-from agent.glm_agent import call_with_stream, call_with_messages
-# from agent.fake_llm import call_with_stream, call_with_messages
 import streamlit as st
 from streamlit_chatbox import *
-import yaml
-
-# 打开并读取YAML文件
-with open('prompt.yaml', 'r', encoding='utf-8') as file:
-    data: dict[str, str] = yaml.safe_load(file)['prompts']
+from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
 
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
@@ -22,7 +15,7 @@ chat_box = ChatBox(
 # 对话主界面逻辑
 def dialogue_page():
     # 创建对话区域和输入区域
-    st.title('汽车语音交互系统Demo')
+    st.title(header)
 
     greeting()
 
@@ -44,8 +37,8 @@ def greeting():
         model_name = "XChat"
     if not chat_box.chat_inited:
         st.toast(
-            f"欢迎使用汽车任务规划系统! \n\n"
-            f"当前运行的模型`{model_name}`, 您可以开始提问了."
+            f"欢迎使用{header}! \n\n"
+            f"当前运行的模型`{model_name}`, 您可以开始使用了."
         )
         chat_box.init_session()
     chat_box.output_messages()
@@ -55,7 +48,7 @@ def greeting():
 def answer_by_steps(user_input):
     chat_box.reset_history()
     chat_box.user_say(user_input)
-    prompt_list = list(data.values())
+    prompt_list = prompt_data.copy()
     length = len(prompt_list)
     if length == 0:
         message = "没有对应提示词，请确认后重试"
@@ -66,97 +59,109 @@ def answer_by_steps(user_input):
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
-        for r in call_with_stream(only_one.format(question=user_input)):
+        for r in call_with_stream(only_one["prompt"].format(question=user_input)):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
         chat_box.update_msg(full_content, streaming=False)
         return
 
 
-# 思维链(目前分为四步）
+# 思维链
 def chain_of_thought(prompt_list, user_input):
-    first_prompt = prompt_list.pop(0)
-    last_prompt = prompt_list.pop(-1)
+    first_prompt = prompt_list.pop(0)["prompt"]
+    last_prompt = prompt_list.pop(-1)["prompt"]
     execution_failed = False
     all_messages = init_all_steps()
-    if len(prompt_list) + 2 != len(all_messages):
-        chat_box.ai_say("提示词与思维链数量出错，请检查无误后重试")
-        return
     chat_box.ai_say(all_messages)
+    results = []
     # 第一次调用
-    execution_failed, result = first_step(execution_failed, first_prompt, user_input)
+    execution_failed = first_step(execution_failed, first_prompt, user_input, results)
 
     # 中间过程
-    execution_failed, result = intermediate_steps(execution_failed, prompt_list, result)
+    execution_failed = intermediate_steps(execution_failed, prompt_list, user_input, results)
 
     # 最后一次流式回答
-    final_step(execution_failed, last_prompt, result)
+    final_step(execution_failed, last_prompt, user_input, results)
 
 
-def final_step(execution_failed, last_prompt, result):
+def compose_prompt(origin_prompt, user_input, results):
+    actual_prompt = origin_prompt
+    if "{question}" in origin_prompt:
+        actual_prompt = origin_prompt.replace("{question}", user_input)
+    for index, result in enumerate(results):
+        if f"{{result{index + 1}}}" in actual_prompt:
+            actual_prompt = actual_prompt.replace(f"{{result{index + 1}}}", result)
+    return actual_prompt
+
+
+def first_step(execution_failed, first_prompt, user_input, results):
+    try:
+        result = call_with_messages(first_prompt.format(question=user_input))
+
+        chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
+        chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
+        print(f"-----------第1次结果:\n{result}")
+        print("------------第一次结束\n")
+        results.append(result)
+    except Exception as e:
+        print(e)
+        chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=0, streaming=False, state="error")
+        execution_failed = True
+    return execution_failed
+
+
+def intermediate_steps(execution_failed, prompt_list, user_input, results):
+    if execution_failed:
+        for index in range(len(prompt_list)):
+            chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=index + 1,
+                                streaming=False, expanded=True, state="error")
+    else:
+        for index, content in enumerate(prompt_list):
+            try:
+                actual_prompt = compose_prompt(content["prompt"], user_input, results)
+
+                result = call_with_messages(actual_prompt)
+
+                chat_box.update_msg(element_index=index, expanded=False)
+                chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
+                chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
+                print(f"-----------第{index + 2}次结果:\n{result}")
+                print(f"------------第{index + 2}次结束\n")
+                results.append(result)
+            except Exception as e:
+                print(e)
+                chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=index + 1,
+                                    streaming=False, state="error")
+                execution_failed = True
+
+    return execution_failed
+
+
+def final_step(execution_failed, last_prompt, user_input, results):
     if execution_failed:
         chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=-1, streaming=False,
                             expanded=True, state="error")
     else:
         full_content = ''  # with incrementally we need to merge output.
         try:
-            for r in call_with_stream(last_prompt.format(question=result)):
+            for r in call_with_stream(compose_prompt(last_prompt, user_input, results)):
                 full_content += r
                 chat_box.update_msg(full_content, element_index=-1, streaming=True, expanded=True)
             chat_box.update_msg(element_index=-2, expanded=False)
             chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
             print(f"-----------最后一次结果:\n{full_content}")
+            print("-----------最后一次结束\n")
         except Exception as e:
             print(e)
             chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1,
                                 streaming=False, state="error")
 
 
-def intermediate_steps(execution_failed, prompt_list, result):
-    if execution_failed:
-        for index, prompt in enumerate(prompt_list):
-            chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=index + 1,
-                                streaming=False, expanded=True, state="error")
-    else:
-        for index, prompt in enumerate(prompt_list):
-            try:
-                actual_prompt = prompt.format(question=result)
-                result = call_with_messages(actual_prompt)
-                chat_box.update_msg(element_index=index, expanded=False)
-                chat_box.update_msg(result, element_index=index + 1, streaming=False, expanded=True, state="complete")
-                chat_box.update_msg("进行中...", element_index=index + 2, streaming=False, expanded=True)
-                print(f"-----------第{index + 2}次结果:\n{result}")
-            except Exception as e:
-                print(e)
-                chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=index + 1,
-                                    streaming=False, state="error")
-                execution_failed = True
-    return execution_failed, result
-
-
-def first_step(execution_failed, first_prompt, user_input):
-    try:
-        result = call_with_messages(first_prompt.format(question=user_input))
-        chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
-        chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
-        print(f"-----------第1次结果:\n{result}")
-    except Exception as e:
-        print(e)
-        chat_box.update_msg('<font color="red">网络异常，请重试</font>', element_index=0, streaming=False, state="error")
-        execution_failed = True
-    return execution_failed, result
-
-
 def init_all_steps():
-    intention_analyse = Markdown("进行中...", in_expander=True,
-                                 expanded=True, title="意图分析和系统分发")
-    module_distribution = Markdown("等待中...", in_expander=True,
-                                   expanded=False, title="模块分发")
-    function_distribution = Markdown("等待中...", in_expander=True,
-                                     expanded=False, title="功能分发")
-    code_generation = Markdown("等待中...", in_expander=True,
-                               expanded=False, title="代码生成")
-    all_messages = [intention_analyse, module_distribution, function_distribution, code_generation]
+    all_messages = [Markdown("进行中", in_expander=True, expanded=False, title=prompt_data[0]["title"])]
+    for i in range(1, len(prompt_data)):
+        all_messages.append(Markdown("等待中...", in_expander=True,
+                                     expanded=False, title=prompt_data[i]["title"]))
     return all_messages
 
 
