@@ -98,7 +98,7 @@ def first_step(execution_failed, first_prompt, user_input, results):
     try:
         result = call_with_messages(first_prompt.format(question=user_input))
 
-        chat_box.update_msg(result, element_index=0, streaming=False, state="complete")
+        chat_box.update_msg(result, expanded=True, element_index=0, streaming=False, state="complete")
         chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
         print(f"-----------第1次结果:\n{result}")
         print("------------第一次结束\n")
