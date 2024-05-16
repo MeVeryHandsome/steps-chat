@@ -5,7 +5,7 @@ qwen_api_key = 'sk-7336b609d03b4646acf0d874a6a95554'
 
 
 def call_with_messages(prompt):
-    messages = [{'role': 'system', 'content': '你是一名汽车车控系统专家'},
+    messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
                 {'role': 'user', 'content': prompt}]
     print("\n正在发起单次提问请求")
     response = dashscope.Generation.call(
@@ -24,7 +24,8 @@ def call_with_messages(prompt):
 
 
 def call_with_stream(prompt):
-    messages = [{'role': 'user', 'content': prompt}]
+    messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
+                {'role': 'user', 'content': prompt}]
     responses = dashscope.Generation.call(dashscope.Generation.Models.qwen_max,
                                           messages=messages,
                                           result_format='message',  # set the result to be "message" format.
