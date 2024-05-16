@@ -1,8 +1,12 @@
 import os
 from datetime import datetime
+from io import BytesIO
+
 import streamlit as st
 from streamlit_chatbox import *
+from audio_recorder_streamlit import audio_recorder
 from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
+from utils.exec_cmd import execute_command
 
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
@@ -10,7 +14,6 @@ chat_box = ChatBox(
         "chatchat_icon_blue_square_v2.png"
     )
 )
-
 
 # 对话主界面逻辑
 def dialogue_page():
@@ -30,11 +33,11 @@ def dialogue_page():
 # 欢迎提示框
 def greeting():
     if call_with_messages.__module__ == "agent.glm_agent":
-        model_name = "GLM-4"
+        model_name = "行至军事大模型"
     elif call_with_messages.__module__ == "agent.qwen_agent":
-        model_name = "Qwen-Max"
+        model_name = "行至军事大模型"
     else:
-        model_name = "XChat"
+        model_name = "行至军事大模型"
     if not chat_box.chat_inited:
         st.toast(
             f"欢迎使用{header}! \n\n"
@@ -151,6 +154,10 @@ def final_step(execution_failed, last_prompt, user_input, results):
             chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
             print(f"-----------最后一次结果:\n{full_content}")
             print("-----------最后一次结束\n")
+            if execute_command(full_content):
+                st.toast("执行成功", icon='🎉')
+            else:
+                st.toast("网络波动，请重试", icon='🛜')
         except Exception as e:
             print(e)
             chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1,
