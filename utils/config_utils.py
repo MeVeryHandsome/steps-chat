@@ -16,3 +16,5 @@ elif model.upper() == "QWEN":
     from agent.qwen_agent import call_with_stream, call_with_messages
 elif model.upper() == "FAKE":
     from agent.fake_llm import call_with_stream, call_with_messages
+elif model.upper() == "XINGZHI":
+    from agent.xingzhi_agent import call_with_stream, call_with_messages
