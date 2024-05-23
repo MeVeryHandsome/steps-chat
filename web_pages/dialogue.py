@@ -30,11 +30,11 @@ def dialogue_page():
 # 欢迎提示框
 def greeting():
     if call_with_messages.__module__ == "agent.glm_agent":
-        model_name = "GLM-4"
+        model_name = "行至军事大模型"
     elif call_with_messages.__module__ == "agent.qwen_agent":
-        model_name = "Qwen-Max"
+        model_name = "行至军事大模型"
     else:
-        model_name = "XChat"
+        model_name = "行至军事大模型"
     if not chat_box.chat_inited:
         st.toast(
             f"欢迎使用{header}! \n\n"
