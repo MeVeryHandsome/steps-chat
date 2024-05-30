@@ -4,7 +4,7 @@ client = ZhipuAI(api_key="717695f1a8c48ea6ed30d9408157abc3.j0cBmnWCyPho4EuK")
 
 
 def call_with_messages(prompt):
-    messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
+    messages = [{'role': 'system', 'content': '你是行至智能公司的标书编写大模型'},
                 {'role': 'user', 'content': prompt}]
     print("\n正在发起单次提问请求")
     response = client.chat.completions.create(
@@ -23,7 +23,7 @@ def call_with_messages(prompt):
 
 
 def call_with_stream(prompt):
-    messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
+    messages = [{'role': 'system', 'content': '你是行至智能公司的标书编写大模型'},
                 {'role': 'user', 'content': prompt}]
     responses = client.chat.completions.create(
         model="glm-4",
