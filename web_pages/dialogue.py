@@ -97,8 +97,7 @@ def compose_prompt(origin_prompt, user_input, results):
 
 def first_step(execution_failed, first_prompt, user_input, results):
     try:
-        result = call_with_messages(first_prompt.format(question=user_input))
-
+        result = call_with_messages(compose_prompt(first_prompt, user_input, results))
         chat_box.update_msg(result, expanded=True, element_index=0, streaming=False, state="complete")
         chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
         print(f"-----------第1次结果:\n{result}")
