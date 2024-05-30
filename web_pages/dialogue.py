@@ -1,10 +1,8 @@
 import os
 from datetime import datetime
-from io import BytesIO
 
 import streamlit as st
 from streamlit_chatbox import *
-from audio_recorder_streamlit import audio_recorder
 from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
 from utils.exec_cmd import execute_command
 
