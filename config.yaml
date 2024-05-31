@@ -11,7 +11,7 @@ main_screen_icon: "chat"
 model: "glm"
 
 # 界面标题
-header: "标书编写系统"
+header: "编写系统"
 
 # 占位符：{question} 表示用户输入的问题，{result1} 表示系统第一次回复的答案，{result2} 表示系统第二次回复的答案...
 prompts:
