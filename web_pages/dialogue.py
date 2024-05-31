@@ -55,12 +55,14 @@ def answer_by_steps(user_input):
         message = "没有对应提示词，请确认后重试"
         chat_box.update_msg(message, streaming=False)
         return
+    all_messages = init_all_steps()
+    chat_box.ai_say(all_messages)
     if length > 1:
         chain_of_thought(prompt_list, user_input)
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
-        for r in call_with_stream(compose_prompt(only_one["prompt"], user_input, [])):
+        for r in call_with_stream(compose_prompt(only_one["prompt"],user_input,[])):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
         chat_box.update_msg(full_content, streaming=False)
@@ -72,8 +74,6 @@ def chain_of_thought(prompt_list, user_input):
     first_prompt = prompt_list.pop(0)["prompt"]
     last_prompt = prompt_list.pop(-1)["prompt"]
     execution_failed = False
-    all_messages = init_all_steps()
-    chat_box.ai_say(all_messages)
     results = []
     # 第一次调用
     execution_failed = first_step(execution_failed, first_prompt, user_input, results)
