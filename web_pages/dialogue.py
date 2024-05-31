@@ -64,8 +64,8 @@ def answer_by_steps(user_input):
         full_content = ''
         for r in call_with_stream(compose_prompt(only_one["prompt"],user_input,[])):
             full_content += r
-            chat_box.update_msg(full_content, streaming=True)
-        chat_box.update_msg(full_content, streaming=False)
+            chat_box.update_msg(full_content, streaming=True, expanded=True)
+        chat_box.update_msg(full_content, streaming=False, expanded=True)
         return
 
 
