@@ -13,6 +13,7 @@ chat_box = ChatBox(
     )
 )
 
+
 # 对话主界面逻辑
 def dialogue_page():
     # 创建对话区域和输入区域
@@ -60,7 +61,7 @@ def answer_by_steps(user_input):
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
-        for r in call_with_stream(only_one["prompt"].format(question=user_input)):
+        for r in call_with_stream(compose_prompt(only_one["prompt"], user_input, [])):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
         chat_box.update_msg(full_content, streaming=False)
@@ -97,7 +98,7 @@ def compose_prompt(origin_prompt, user_input, results):
 
 def first_step(execution_failed, first_prompt, user_input, results):
     try:
-        result = call_with_messages(first_prompt.format(question=user_input))
+        result = call_with_messages(compose_prompt(first_prompt, user_input, results))
 
         chat_box.update_msg(result, expanded=True, element_index=0, streaming=False, state="complete")
         chat_box.update_msg("进行中...", element_index=1, streaming=False, expanded=True)
