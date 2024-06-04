@@ -152,10 +152,10 @@ def final_step(execution_failed, last_prompt, user_input, results):
             chat_box.update_msg(full_content, element_index=-1, streaming=False, state="complete")
             print(f"-----------最后一次结果:\n{full_content}")
             print("-----------最后一次结束\n")
-            if execute_command(full_content):
-                st.toast("执行成功", icon='🎉')
-            else:
-                st.toast("网络波动，请重试", icon='🛜')
+            # if execute_command(full_content):
+            #     st.toast("执行成功", icon='🎉')
+            # else:
+            #     st.toast("网络波动，请重试", icon='🛜')
         except Exception as e:
             print(e)
             chat_box.update_msg(full_content + '<br/><br/><font color="red">网络异常，请重试</font>', element_index=-1,
