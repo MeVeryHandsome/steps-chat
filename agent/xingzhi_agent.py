@@ -3,7 +3,7 @@ import json
 import requests
 
 def call_with_messages(prompt):
-    url = "http://127.0.0.1:41231/xchat-answer/v1/api/chat"
+    url = "http://123.57.244.236:15103/xchat-answer/v1/api/chat"
     payload = {
         "question": prompt
     }
@@ -20,7 +20,7 @@ def call_with_messages(prompt):
         print("Failed to get response, status code:", response.status_code)
 
 def call_with_stream(prompt):
-    url = "http://127.0.0.1:41231/xchat-answer/v1/api/eventchat"
+    url = "http://123.57.244.236:15103/xchat-answer/v1/api/eventchat"
     payload = {
         "question": prompt
     }
