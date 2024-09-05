@@ -144,14 +144,24 @@ def intermediate_steps(prompt_list, user_input):
 
 
 def show_diagram(diagram_prompt, results):
+    # 创建一个占位符
+    placeholder = st.empty()
+
+    # 使用占位符显示加载状态
+    with placeholder.expander("流程图生成中...", expanded=True):
+        st.write("请稍候，正在生成流程图...")
+
+    # 调用get_graph生成流程图
     result = get_graph(diagram_prompt, results)
-    print(result)
-    # 使用 expander 模拟弹窗显示
-    with st.expander("点击查看流程图", expanded=False):
+
+    # 当流程图生成完毕后，替换占位符内容
+    with placeholder.expander("点击查看流程图", expanded=False):
         try:
             st.graphviz_chart(result)
         except Exception as e:
+            st.error("生成流程图时出错")
             print(e)
+
 
 
 def get_graph(diagram_prompt, results):
