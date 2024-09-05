@@ -3,7 +3,7 @@ from datetime import datetime
 
 import streamlit as st
 from streamlit_chatbox import *
-from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
+from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream, diagram_prompt
 from utils.prompt_utils import compose_prompt
 
 chat_box = ChatBox(
@@ -88,7 +88,17 @@ def answer_by_steps(user_input):
 def chain_of_thought(prompt_data, user_input):
     all_messages = init_all_steps()
     chat_box.ai_say(all_messages)
-    intermediate_steps(prompt_data, user_input)
+    results, execution_failed = intermediate_steps(prompt_data, user_input)
+    if not execution_failed:
+        show_diagram(diagram_prompt, results)
+
+
+def init_all_steps():
+    all_messages = [Markdown("进行中", in_expander=True, expanded=False, title=prompt_data[0]["title"])]
+    for i in range(1, len(prompt_data)):
+        all_messages.append(Markdown("等待中...", in_expander=True,
+                                     expanded=False, title=prompt_data[i]["title"]))
+    return all_messages
 
 
 def intermediate_steps(prompt_list, user_input):
@@ -104,14 +114,12 @@ def intermediate_steps(prompt_list, user_input):
                 result = ''
                 for r in call_with_stream(actual_prompt):
                     result += r
-                    chat_box.update_msg(result, element_index=index, streaming=True)
+                    chat_box.update_msg(result, element_index=index, expanded=True, streaming=True)
                 chat_box.update_msg(result, element_index=index, streaming=False, state="complete")
             elif return_type == "normal":
                 result = call_with_messages(actual_prompt)
                 chat_box.update_msg(result, element_index=index, streaming=False, expanded=True, state="complete")
 
-            if index > 0:
-                chat_box.update_msg(element_index=index - 1, expanded=False)
             if index < len(prompt_list) - 1:
                 chat_box.update_msg("进行中...", element_index=index + 1, streaming=False, expanded=True)
 
@@ -130,13 +138,17 @@ def intermediate_steps(prompt_list, user_input):
     if execution_failed:
         for i in range(index + 1, len(prompt_list)):
             chat_box.update_msg('<font color="red">前序步骤出错，暂停执行</font>', element_index=i,
-                            streaming=False, expanded=True, state="error")
-    return execution_failed
+                                streaming=False, expanded=True, state="error")
+    return results, execution_failed
 
 
-def init_all_steps():
-    all_messages = [Markdown("进行中", in_expander=True, expanded=False, title=prompt_data[0]["title"])]
-    for i in range(1, len(prompt_data)):
-        all_messages.append(Markdown("等待中...", in_expander=True,
-                                     expanded=False, title=prompt_data[i]["title"]))
-    return all_messages
+def show_diagram(diagram_prompt, results):
+    actual_prompt = compose_prompt(diagram_prompt, '', results)
+    result = call_with_messages(actual_prompt)
+    print(result)
+ # 使用 expander 模拟弹窗显示
+    try:
+        with st.expander("点击查看流程图", expanded=False):
+            st.graphviz_chart(result)
+    except Exception as e:
+        print(e)

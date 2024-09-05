@@ -9,6 +9,7 @@ with open('config.yaml', 'r', encoding='utf-8') as file:
     header = file_content['header']
     model:str = file_content['model']
     prompt_data = list(file_content['prompt_config'].values())
+    diagram_prompt = file_content['show_graph']['prompt']
 
 if model.upper() == "GLM":
     from agent.glm_agent import call_with_stream, call_with_messages
