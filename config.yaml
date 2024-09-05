@@ -8,7 +8,7 @@ version: "Beta"
 main_screen_icon: "chat"
 
 # 选择模型类型(大小写均可)，支持"GLM"和"QWEN"，配置"FAKE"可用于测试
-model: "glm"
+model: "qwen"
 
 # 界面标题
 header: "双向认知功能演示"
@@ -25,13 +25,13 @@ prompt_config:
       你是一个军事仿真推演系统算子设计开发的专家，你对军事算子的业务执行流程和代码编写规范非常熟悉，现在我给你提供一段节选自其他军事仿真推演系统的代码片段，需要你结合通识和军事专业知识对这段代码进行阅读理解，分析这段代码中的哪些内容描述了哪个或哪些军事算子？逐个分析这些算子适用于哪个或哪些军事业务场景？最终用中文将结果总结输出即可，要求输出内容不超过50字，不要复述问题，不要有任何多余内容的回复。
       输出格式如下:
       
+      ## 描述：
+
+      （代码功能概括）
+      
       ## 总结：
       
       （算子名称与适用场景）
-      
-      ## 描述：
-      
-      （代码功能概括）
       
       以下是给你提供的代码片段:{question}
       '
@@ -41,7 +41,7 @@ prompt_config:
     type: "stream"
     prompt:
       '
-      你是一个军事仿真推演系统算子设计开发的专家，你对军事算子的业务执行流程和代码编写规范非常熟悉，现在我给你提供一段节选自其他军事仿真推演系统的代码片段和其对应适用的业务场景，需要你在原代码基础上，对其中涉及业务流程和判断逻辑的内容进行注释，注释的格式为“简要的综述，加较为详细的解释描述”，请你直接输出完整的带有注释的代码，不要复述问题，不要在开头和结尾加上冗余回复，不要有任何多余内容的回复(比如“以上代码中，每个方法都有相应的注释，描述了其业务逻辑和执行流程。”）！！直接输出代码即可，只需要代码。
+      你是一个军事仿真推演系统算子设计开发的专家，你对军事算子的业务执行流程和代码编写规范非常熟悉，现在我给你提供一段节选自其他军事仿真推演系统的代码片段和其对应适用的业务场景，需要你在原代码基础上，对其中涉及业务流程和判断逻辑的内容进行注释，注释的格式为“简要的综述，加较为详细的解释描述”，请你直接输出完整的带有注释的代码，不要复述问题，不要有任何多余内容的回复！直接输出代码即可。
       场景：{result1}
       代码：{question}
       '
@@ -50,87 +50,214 @@ prompt_config:
     title: "流程json转写"
     type: "stream"
     prompt: '
-    你擅长梳理业务流程并将其写成易于理解的json代码，现在我给你提供一段节选自其他军事仿真推演系统的包含注释的代码片段，需要你根据注释内容和代码逻辑，对其中的业务流程和判断逻辑进行梳理，所得到的应该是一套完整的业务流程环节，需要将这套流程以如下json格式进行输出，所有输出内容都要使用简洁的中文。不要复述问题，不要有任何多余内容的回复，以json格式输出结果。
-    单个环节的json格式：
+    代码示例：
+    class FighterJet:
+        def __init__(self, id, position):
+            self.id = id  # 战斗机的唯一标识符
+            self.position = position  # 战斗机当前位置
+            self.weapon_loadout = {"missiles": 2, "cannon": 100}  # 武器配置
+    
+        def receive_mission(self, target):
+            self.target = target  # 接受目标信息
+    
+        def choose_attack_strategy(self):
+            if self.weapon_loadout["missiles"] > 0:
+                self.weapon_to_use = "missile"  # 使用导弹
+            else:
+                self.weapon_to_use = "cannon"  # 使用大炮
+    
+        def execute_attack(self):
+            if self.weapon_to_use == "missile":
+                self.weapon_loadout["missiles"] -= 1  # 发射导弹
+                return "missile_fired"
+            else:
+                self.weapon_loadout["cannon"] -= 10  # 发射大炮
+                return "cannon_fired"
+    
+    # 示例任务执行过程：
+    jet = FighterJet("FJ001", [0, 0])  # 初始化战斗机
+    jet.receive_mission({"position": [100, 200], "type": "ground"})  # 接受任务
+    jet.choose_attack_strategy()  # 选择攻击策略
+    result = jet.execute_attack()  # 执行攻击
+
+    json输出：
     {
-    （每个环节独占一个代码块，需要完整描述本环节内容和下游环节所指）
-    环节：（注释中明确了环节名称，采用逗号前的短句）
-    指向：（某条件分支下的下一个环节是什么）
-    判定：（进行这个分支下一个环节的条件是什么）
-    （尤其注意代码和注释中的if else和否则部分，这代表有多个分支，应添加指向和判定字段使单个环节的信息完整）
+      "id": "start_mission",
+      "type": "action",
+      "description": "接收任务并获取目标信息。",
+      "next": "choose_attack_strategy"
+    },
+    {
+      "id": "choose_attack_strategy",
+      "type": "decision",
+      "description": "根据武器负载选择攻击策略。",
+      "next": [
+        {
+          "condition": "导弹可用",
+          "id": "use_missile"
+        },
+        {
+          "condition": "导弹不可用",
+          "id": "use_cannon"
+        }
+      ]
+    },
+    {
+      "id": "use_missile",
+      "type": "action",
+      "description": "发射导弹攻击目标。",
+      "next": "attack_result"
+    },
+    {
+      "id": "use_cannon",
+      "type": "action",
+      "description": "使用大炮攻击目标。",
+      "next": "attack_result"
+    },
+    {
+      "id": "attack_result",
+      "type": "decision",
+      "description": "评估攻击效果，是否继续任务？",
+      "next": [
+        {
+          "condition": "继续任务",
+          "id": "choose_attack_strategy"
+        },
+        {
+          "condition": "结束任务",
+          "id": "end_mission"
+        }
+      ]
+    },
+    {
+      "id": "end_mission",
+      "type": "action",
+      "description": "任务结束，返回基地。",
+      "next": "start_mission"
     }
+
+    假设你是精通军事业务的程序员，请你根据用户提供的代码，生成决策树的 JSON 结构。
+    每个节点对象应包括 id字段, type字段, description字段、以及next数组，
+    id是当前节点的唯一标识；
+    type是当前节点的类型，包含两种类型：decision、action，decision表示决策节点，action表示行动节点；
+    description是当前节点的描述；
+    next是指向下一节点的ID列表，对于行动节点，next映射出后续节点的id；
+    对于决策节点，next映射出基于不同条件的不同路径。
+    请你确保 JSON 结构清晰、逻辑性强。
     以下是给你提供的代码片段：{result2}
+    json输出：
     '
+
 
 show_graph:
   prompt: '
   示例：
   流程json：
-  {
-  "接收任务": {
-    "指向": "分析目标",
-    "判定": "初始化坦克后"
-  },
-  "分析目标": {
-    "指向": "选择攻击策略",
-    "判定": "确定目标类型"
-  },
-  "选择攻击策略": {
-    "指向": "执行机动",
-    "判定": "根据弹药和目标类型选择武器"
-  },
-  "执行机动": {
-    "指向": "占领攻击位置",
-    "判定": "到达目标位置"
-  },
-  "占领攻击位置": {
-    "指向": "校准武器",
-    "判定": "到达攻击位置"
-  },
-  "校准武器": {
-    "指向": "发射武器",
-    "判定": "根据使用武器类型进行校准"
-  },
-  "发射武器": {
-    "指向": "评估打击效果",
-    "判定": "准备攻击"
-  },
-  "评估打击效果": {
-    "指向": "决定下一步行动",
-    "判定": "判断目标是否被摧毁"
-  },
-  "决定下一步行动": {
-    "指向": "结束任务",
-    "判定": "根据任务成功与否及弹药情况决定"
-  }
-  }
+  [
+    {
+      "id": "start_mission",
+      "type": "action",
+      "description": "启动无人机，接收侦察任务。",
+      "next": "detect_target"
+    },
+    {
+      "id": "detect_target",
+      "type": "decision",
+      "description": "是否在侦察范围内发现目标？",
+      "next": [
+        {
+          "condition": "发现目标",
+          "id": "analyze_threat"
+        },
+        {
+          "condition": "未发现目标",
+          "id": "continue_patrol"
+        }
+      ]
+    },
+    {
+      "id": "analyze_threat",
+      "type": "decision",
+      "description": "目标是否构成威胁？",
+      "next": [
+        {
+          "condition": "威胁",
+          "id": "prepare_attack"
+        },
+        {
+          "condition": "无威胁",
+          "id": "continue_patrol"
+        }
+      ]
+    },
+    {
+      "id": "prepare_attack",
+      "type": "action",
+      "description": "准备攻击，锁定目标。",
+      "next": "launch_attack"
+    },
+    {
+      "id": "launch_attack",
+      "type": "action",
+      "description": "发射导弹攻击目标。",
+      "next": "assess_damage"
+    },
+    {
+      "id": "assess_damage",
+      "type": "decision",
+      "description": "评估攻击结果，目标是否被摧毁？",
+      "next": [
+        {
+          "condition": "摧毁",
+          "id": "return_base"
+        },
+        {
+          "condition": "未摧毁",
+          "id": "prepare_attack"
+        }
+      ]
+    },
+    {
+      "id": "continue_patrol",
+      "type": "action",
+      "description": "继续执行侦察巡逻任务。",
+      "next": "detect_target"
+    },
+    {
+      "id": "return_base",
+      "type": "action",
+      "description": "任务完成，返回基地。",
+      "next": null
+    }
+  ]
+
   
   输出：
-  digraph G {
-    "接收任务" -> "分析目标" [label="初始化坦克后"]
-    "分析目标" -> "选择攻击策略" [label="确定目标类型"]
-    "选择攻击策略" -> "执行机动" [label="根据弹药和目标类型选择武器"]
-    "执行机动" -> "占领攻击位置" [label="到达目标位置"]
-    "占领攻击位置" -> "校准武器" [label="到达攻击位置"]
-    "校准武器" -> "发射武器" [label="根据使用武器类型进行校准"]
-    "发射武器" -> "评估打击效果" [label="准备攻击"]
-    "评估打击效果" -> "决定下一步行动" [label="判断目标是否被摧毁"]
-    "决定下一步行动" -> "结束任务" [label="根据任务成功与否及弹药情况决定"]
-
-    # 定义节点样式
-    "接收任务" [shape=box]
-    "分析目标" [shape=box]
-    "选择攻击策略" [shape=box]
-    "执行机动" [shape=box]
-    "占领攻击位置" [shape=box]
-    "校准武器" [shape=box]
-    "发射武器" [shape=box]
-    "评估打击效果" [shape=box]
-    "决定下一步行动" [shape=box]
-    "结束任务" [shape=box]
-  }
+  digraph flowchart {
+      "启动无人机，接收侦察任务。" [shape=box];
+      "是否在侦察范围内发现目标？" [shape=diamond];
+      "目标是否构成威胁？" [shape=diamond];
+      "准备攻击，锁定目标。" [shape=box];
+      "发射导弹攻击目标。" [shape=box];
+      "评估攻击结果，目标是否被摧毁？" [shape=diamond];
+      "继续执行侦察巡逻任务。" [shape=box];
+      "任务完成，返回基地。" [shape=box];
   
-  假设你是一名数据结构程序员，擅长从json中抽取流程并生成digraph G语言，上面是抽取示例，现在我给你提供一段已有的流程json数据，需要你根据流程json，对其中的业务流程和判断逻辑进行梳理，需要将这套流程以如下digraph G语言格式进行输出，请你不要复述问题，不要回复除了digraph G语言之外的文字，不能有任何多余内容的回复！直接以digraph G { }包裹的形式输出结果，并且节点需要加上[shape=box]的限制。
+      "启动无人机，接收侦察任务。" -> "是否在侦察范围内发现目标？";
+      "是否在侦察范围内发现目标？" -> "目标是否构成威胁？" [label="发现目标"];
+      "是否在侦察范围内发现目标？" -> "继续执行侦察巡逻任务。" [label="未发现目标"];
+      "目标是否构成威胁？" -> "准备攻击，锁定目标。" [label="威胁"];
+      "目标是否构成威胁？" -> "继续执行侦察巡逻任务。" [label="无威胁"];
+      "准备攻击，锁定目标。" -> "发射导弹攻击目标。";
+      "发射导弹攻击目标。" -> "评估攻击结果，目标是否被摧毁？";
+      "评估攻击结果，目标是否被摧毁？" -> "任务完成，返回基地。" [label="摧毁"];
+      "评估攻击结果，目标是否被摧毁？" -> "准备攻击，锁定目标。" [label="未摧毁"];
+      "继续执行侦察巡逻任务。" -> "是否在侦察范围内发现目标？";
+  }
+
+  假设你是一名数据结构程序员，擅长从json中抽取流程并生成DOT语言，上面是抽取示例。
+  注意事项：1.节点需要纯中文，不要用id的英语作为节点名称；2.action节点为动作节点，需要用长方形，decision节点为决策节点，需要用菱形表示，并且下一节点的边上需要带上condition条件；3.json中可能会出现环形结构，需要你判断并处理，不要出现重复的节点；
+  现在我给你提供一段已有的流程json数据，需要你根据流程json，对其中的业务流程和判断逻辑进行梳理，需要将这套流程以如下DOT语言格式进行输出，请你不要复述问题，不能有任何多余内容的回复！
   
   流程json：
   {result3}

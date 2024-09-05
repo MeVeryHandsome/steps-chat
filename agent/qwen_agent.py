@@ -31,7 +31,7 @@ def call_with_stream(prompt):
                                           result_format='message',  # set the result to be "message" format.
                                           stream=True,  # set stream output.
                                           incremental_output=True,  # get streaming output incrementally.
-                                          api_key=qwen_api_key,
+                                          api_key=qwen_api_key
                                           )
     print("\n正在发起流式回答请求")
     for response in responses:

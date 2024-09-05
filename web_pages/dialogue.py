@@ -3,8 +3,9 @@ from datetime import datetime
 
 import streamlit as st
 from streamlit_chatbox import *
+
 from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream, diagram_prompt
-from utils.prompt_utils import compose_prompt
+from utils.related_str_utils import compose_prompt, prevent_non_sense
 
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
@@ -143,12 +144,17 @@ def intermediate_steps(prompt_list, user_input):
 
 
 def show_diagram(diagram_prompt, results):
-    actual_prompt = compose_prompt(diagram_prompt, '', results)
-    result = call_with_messages(actual_prompt)
+    result = get_graph(diagram_prompt, results)
     print(result)
- # 使用 expander 模拟弹窗显示
-    try:
-        with st.expander("点击查看流程图", expanded=False):
+    # 使用 expander 模拟弹窗显示
+    with st.expander("点击查看流程图", expanded=False):
+        try:
             st.graphviz_chart(result)
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(e)
+
+
+def get_graph(diagram_prompt, results):
+    actual_prompt = compose_prompt(diagram_prompt, '', results)
+    result = prevent_non_sense(call_with_messages(actual_prompt))
+    return result
