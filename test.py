@@ -1,5 +1,5 @@
 import re
-
+import streamlit as st
 from utils.related_str_utils import prevent_non_sense
 
 # 输入字符串
@@ -25,7 +25,7 @@ digraph flowchart {
     "评估攻击结果，目标是否被摧毁？" -> "准备攻击，锁定目标。" [label="未摧毁"];
     "继续执行侦察巡逻任务。" -> "是否在侦察范围内发现目标？";
 }
-安吉斯都叫哦韩素电脑
 '''
+result = prevent_non_sense(dot_string)
+st.graphviz_chart(result)
 
-print(prevent_non_sense(dot_string))

@@ -54,99 +54,47 @@ prompt_config:
     title: "流程json转写"
     type: "stream"
     prompt: '
-    代码示例：
-    class FighterJet:
-        def __init__(self, id, position):
-            self.id = id  # 战斗机的唯一标识符
-            self.position = position  # 战斗机当前位置
-            self.weapon_loadout = {"missiles": 2, "cannon": 100}  # 武器配置
-    
-        def receive_mission(self, target):
-            self.target = target  # 接受目标信息
-    
-        def choose_attack_strategy(self):
-            if self.weapon_loadout["missiles"] > 0:
-                self.weapon_to_use = "missile"  # 使用导弹
-            else:
-                self.weapon_to_use = "cannon"  # 使用大炮
-    
-        def execute_attack(self):
-            if self.weapon_to_use == "missile":
-                self.weapon_loadout["missiles"] -= 1  # 发射导弹
-                return "missile_fired"
-            else:
-                self.weapon_loadout["cannon"] -= 10  # 发射大炮
-                return "cannon_fired"
-    
-    # 示例任务执行过程：
-    jet = FighterJet("FJ001", [0, 0])  # 初始化战斗机
-    jet.receive_mission({"position": [100, 200], "type": "ground"})  # 接受任务
-    jet.choose_attack_strategy()  # 选择攻击策略
-    result = jet.execute_attack()  # 执行攻击
-
-    json输出：
-    {
-      "id": "start_mission",
-      "type": "action",
-      "description": "接收任务并获取目标信息。",
-      "next": "choose_attack_strategy"
-    },
-    {
-      "id": "choose_attack_strategy",
-      "type": "decision",
-      "description": "根据武器负载选择攻击策略。",
-      "next": [
-        {
-          "condition": "导弹可用",
-          "id": "use_missile"
-        },
-        {
-          "condition": "导弹不可用",
-          "id": "use_cannon"
-        }
-      ]
-    },
-    {
-      "id": "use_missile",
-      "type": "action",
-      "description": "发射导弹攻击目标。",
-      "next": "attack_result"
-    },
-    {
-      "id": "use_cannon",
-      "type": "action",
-      "description": "使用大炮攻击目标。",
-      "next": "attack_result"
-    },
-    {
-      "id": "attack_result",
-      "type": "decision",
-      "description": "评估攻击效果，是否继续任务？",
-      "next": [
-        {
-          "condition": "继续任务",
-          "id": "choose_attack_strategy"
-        },
-        {
-          "condition": "结束任务",
-          "id": "end_mission"
-        }
-      ]
-    },
-    {
-      "id": "end_mission",
-      "type": "action",
-      "description": "任务结束，返回基地。",
-      "next": "start_mission"
-    }
-
     假设你是精通军事业务的程序员，请你根据用户提供的代码，生成决策树的 JSON 结构。
-    每个节点对象应包括 id字段, type字段, description字段、以及next数组，
+    每个节点对象应包括 id字段, 节点类型字段, 节点描述字段、以及下一节点数组，
+    下面是示例结构：
+    [
+        {
+            "id": 1,
+            "节点类型": 执行节点,
+            "节点描述": "示例",
+            "下一节点": [2]
+        },
+        {
+            "id": 2,
+            "节点类型": 决策节点,
+            "节点描述": "决策节点示例",
+            "下一节点": [{
+              "id": 3,
+              "条件": "是"
+            },
+            {
+              "id": 4,
+              "条件": "否"
+            }
+            ]
+        },
+        {
+            "id": 3,
+            "节点类型": 执行节点,
+            "节点描述": "示例",
+            "下一节点": null
+        },
+        {
+            "id": 4,
+            "节点类型": 执行节点,
+            "节点描述": "示例",
+            "下一节点": null
+        },
+    ]
     id是当前节点的唯一标识；
-    type是当前节点的类型，包含两种类型：decision、action，decision表示决策节点，action表示行动节点；
-    description是当前节点的描述；
-    next是指向下一节点的ID列表，对于行动节点，next映射出后续节点的id；
-    对于决策节点，next映射出基于不同条件的不同路径。
+    节点类型是当前节点的类型，包含两种类型：决策节点，执行节点；
+    节点描述是当前节点的文字描述；
+    下一节点是指向下一节点的ID列表，对于行动节点，下一节点映射出后续节点的id；对于决策节点，下一节点映射出基于不同条件的不同路径。
     请你确保 JSON 结构清晰、逻辑性强，并且不要在开头和结尾加上冗余回复，直接输出json即可。
     以下是给你提供的代码片段：{result2}
     json输出：
@@ -155,108 +103,56 @@ prompt_config:
 
 show_graph:
   prompt: '
-  示例：
-  流程json：
+  下面是输入的示例结构：
   [
-    {
-      "id": "start_mission",
-      "type": "action",
-      "description": "启动无人机，接收侦察任务。",
-      "next": "detect_target"
-    },
-    {
-      "id": "detect_target",
-      "type": "decision",
-      "description": "是否在侦察范围内发现目标？",
-      "next": [
-        {
-          "condition": "发现目标",
-          "id": "analyze_threat"
-        },
-        {
-          "condition": "未发现目标",
-          "id": "continue_patrol"
-        }
-      ]
-    },
-    {
-      "id": "analyze_threat",
-      "type": "decision",
-      "description": "目标是否构成威胁？",
-      "next": [
-        {
-          "condition": "威胁",
-          "id": "prepare_attack"
-        },
-        {
-          "condition": "无威胁",
-          "id": "continue_patrol"
-        }
-      ]
-    },
-    {
-      "id": "prepare_attack",
-      "type": "action",
-      "description": "准备攻击，锁定目标。",
-      "next": "launch_attack"
-    },
-    {
-      "id": "launch_attack",
-      "type": "action",
-      "description": "发射导弹攻击目标。",
-      "next": "assess_damage"
-    },
-    {
-      "id": "assess_damage",
-      "type": "decision",
-      "description": "评估攻击结果，目标是否被摧毁？",
-      "next": [
-        {
-          "condition": "摧毁",
-          "id": "return_base"
-        },
-        {
-          "condition": "未摧毁",
-          "id": "prepare_attack"
-        }
-      ]
-    },
-    {
-      "id": "continue_patrol",
-      "type": "action",
-      "description": "继续执行侦察巡逻任务。",
-      "next": "detect_target"
-    },
-    {
-      "id": "return_base",
-      "type": "action",
-      "description": "任务完成，返回基地。",
-      "next": null
-    }
+      {
+          "id": 1,
+          "节点类型": 执行节点,
+          "节点描述": "执行示例1",
+          "下一节点": [2]
+      },
+      {
+          "id": 2,
+          "节点类型": 决策节点,
+          "节点描述": "决策示例1",
+          "下一节点": [{
+            "id": 3,
+            "条件": "是"
+          },
+          {
+            "id": 4,
+            "条件": "否"
+          }
+          ]
+      },
+      {
+          "id": 3,
+          "节点类型": 执行节点,
+          "节点描述": "执行示例3",
+          "下一节点": null
+      },
+      {
+          "id": 4,
+          "节点类型": 执行节点,
+          "节点描述": "执行示例4",
+          "下一节点": null
+      },
   ]
-
+  
+  说明：id是当前节点的唯一标识；
+  节点类型是当前节点的类型，包含两种类型：决策节点，执行节点；
+  节点描述是当前节点的文字描述；
+  下一节点是指向下一节点的ID列表，对于行动节点，下一节点映射出后续节点的id；对于决策节点，下一节点映射出基于不同条件的不同路径。
   
   输出：
   digraph flowchart {
-      "启动无人机，接收侦察任务。" [shape=box];
-      "是否在侦察范围内发现目标？" [shape=diamond];
-      "目标是否构成威胁？" [shape=diamond];
-      "准备攻击，锁定目标。" [shape=box];
-      "发射导弹攻击目标。" [shape=box];
-      "评估攻击结果，目标是否被摧毁？" [shape=diamond];
-      "继续执行侦察巡逻任务。" [shape=box];
-      "任务完成，返回基地。" [shape=box];
-  
-      "启动无人机，接收侦察任务。" -> "是否在侦察范围内发现目标？";
-      "是否在侦察范围内发现目标？" -> "目标是否构成威胁？" [label="发现目标"];
-      "是否在侦察范围内发现目标？" -> "继续执行侦察巡逻任务。" [label="未发现目标"];
-      "目标是否构成威胁？" -> "准备攻击，锁定目标。" [label="威胁"];
-      "目标是否构成威胁？" -> "继续执行侦察巡逻任务。" [label="无威胁"];
-      "准备攻击，锁定目标。" -> "发射导弹攻击目标。";
-      "发射导弹攻击目标。" -> "评估攻击结果，目标是否被摧毁？";
-      "评估攻击结果，目标是否被摧毁？" -> "任务完成，返回基地。" [label="摧毁"];
-      "评估攻击结果，目标是否被摧毁？" -> "准备攻击，锁定目标。" [label="未摧毁"];
-      "继续执行侦察巡逻任务。" -> "是否在侦察范围内发现目标？";
+      "执行示例1" [shape=box];
+      "决策示例1？" [shape=diamond];
+      "执行示例3" [shape=box];
+      "执行示例4" [shape=box];
+            
+      "决策示例1" -> "执行示例3" [label="是"];
+      "决策示例1" -> "执行示例4" [label="否"];
   }
 
   假设你是一名数据结构程序员，擅长从json中抽取流程并生成DOT语言，上面是抽取示例。
