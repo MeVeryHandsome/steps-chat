@@ -58,6 +58,7 @@ dot_pattern = re.compile(r'digraph\s+[a-zA-Z0-9_]+\s*\{[^}]+\}', re.DOTALL)
 
 
 def prevent_non_sense(dot_string):
+    print(f"----模型生成流程图数据：\n{dot_string}")
     # 使用正则表达式提取内容
     dot_content = dot_pattern.search(dot_string)
 
