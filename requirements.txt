@@ -4,3 +4,4 @@ streamlit_option_menu
 dashscope~=1.17.0
 PyYAML~=6.0.1
 zhipuai
+openai
