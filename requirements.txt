@@ -5,3 +5,5 @@ dashscope~=1.17.0
 PyYAML~=6.0.1
 zhipuai
 openai
+flask
+flask-cors
