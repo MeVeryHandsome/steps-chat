@@ -66,6 +66,7 @@ def answer_by_steps(user_input):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
         chat_box.update_msg(full_content, streaming=False, state="complete")
+        print(full_content)
         return
 
 

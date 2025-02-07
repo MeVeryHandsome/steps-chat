@@ -1,21 +1,23 @@
 from http import HTTPStatus
-import dashscope
+from openai import OpenAI
 
-qwen_api_key = 'sk-7336b609d03b4646acf0d874a6a95554'
+client = OpenAI(
+    api_key="empty",
+    base_url="http://123.57.244.236:1742/v1",
+)
 
 
 def call_with_messages(prompt):
     messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
                 {'role': 'user', 'content': prompt}]
     print("\n正在发起单次提问请求")
-    response = dashscope.Generation.call(
-        dashscope.Generation.Models.qwen_max,
+    response = client.chat.completions.create(
+        model="qwen2.5-1.5B",
         messages=messages,
-        result_format='message',  # set the result to be "message" format.
-        api_key=qwen_api_key,
+        stream=False
     )
     if response.status_code == HTTPStatus.OK:
-        return response.output.choices[0].message.content
+        return response.choices[0].message.content
     else:
         raise Exception('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
             response.request_id, response.status_code,
@@ -26,20 +28,17 @@ def call_with_messages(prompt):
 def call_with_stream(prompt):
     messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
                 {'role': 'user', 'content': prompt}]
-    responses = dashscope.Generation.call(dashscope.Generation.Models.qwen_max,
+    responses = client.chat.completions.create(model="qwen2.5-1.5B",
                                           messages=messages,
-                                          result_format='message',  # set the result to be "message" format.
-                                          stream=True,  # set stream output.
-                                          incremental_output=True,  # get streaming output incrementally.
-                                          api_key=qwen_api_key,
-                                          )
+                                          stream=True)
     print("\n正在发起流式回答请求")
     for response in responses:
-        if response.status_code == HTTPStatus.OK:
-            now_content = response.output.choices[0]['message']['content']
+        if response:
+            now_content = response.choices[0].delta.content
             yield now_content
         else:
             print('Request id: %s, Status code: %s, error code: %s, error message: %s' % (
                 response.request_id, response.status_code,
                 response.code, response.message
             ))
+            return
