@@ -4,7 +4,6 @@ from datetime import datetime
 import streamlit as st
 from streamlit_chatbox import *
 from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
-from utils.exec_cmd import execute_command
 
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
@@ -53,18 +52,20 @@ def answer_by_steps(user_input):
     prompt_list = prompt_data.copy()
     length = len(prompt_list)
     if length == 0:
+        chat_box.ai_say(Markdown("进行中", in_expander=True, expanded=True))
         message = "没有对应提示词，请确认后重试"
-        chat_box.update_msg(message, streaming=False)
+        chat_box.update_msg(message, streaming=False, state="complete")
         return
     if length > 1:
         chain_of_thought(prompt_list, user_input)
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
+        chat_box.ai_say(Markdown("进行中", in_expander=True, expanded=True, title=prompt_data[0]["title"]))
         for r in call_with_stream(compose_prompt(only_one["prompt"], user_input, [])):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
-        chat_box.update_msg(full_content, streaming=False)
+        chat_box.update_msg(full_content, streaming=False, state="complete")
         return
 
 
