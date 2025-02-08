@@ -8,10 +8,10 @@ version: "Beta"
 main_screen_icon: "chat"
 
 # 选择模型类型(大小写均可)，支持"GLM"和"QWEN"，配置"FAKE"可用于测试
-model: "qwen"
+model: "deepseek"
 
 # 界面标题
-header: "平台控制demo"
+header: "平台控制demo-XThink-1.5B"
 
 # 占位符：{question} 表示用户输入的问题，{result1} 表示系统第一次回复的答案，{result2} 表示系统第二次回复的答案...
 prompts:

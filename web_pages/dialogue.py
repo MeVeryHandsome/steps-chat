@@ -3,7 +3,7 @@ from datetime import datetime
 
 import streamlit as st
 from streamlit_chatbox import *
-from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream
+from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream, model
 
 chat_box = ChatBox(
     assistant_avatar=os.path.join(
@@ -56,12 +56,35 @@ def answer_by_steps(user_input):
         message = "没有对应提示词，请确认后重试"
         chat_box.update_msg(message, streaming=False, state="complete")
         return
-    if length > 1:
+    elif length > 1:
         chain_of_thought(prompt_list, user_input)
+        return
+    elif model.upper() == "DEEPSEEK":
+        only_one = prompt_list.pop(-1)
+        chat_box.ai_say([Markdown("进行中", in_expander=True, expanded=True, title='思考过程'),
+                         Markdown("等待中", in_expander=True, expanded=False, title='结果输出')])
+        think_flag = False
+        full_content = ''
+        for r in call_with_stream(compose_prompt(only_one["prompt"], user_input, [])):
+            if r == "<think>":
+                think_flag = True
+            elif r == "</think>":
+                think_flag = False
+                full_content = ''
+                chat_box.update_msg(element_index=0, streaming=True, state="complete", expanded=False)
+            if think_flag:
+                full_content += r
+                chat_box.update_msg(full_content, element_index=0, streaming=True)
+            else:
+                full_content += r
+                chat_box.update_msg(full_content, element_index=1, streaming=True, expanded=True)
+        chat_box.update_msg(full_content, element_index=1,  streaming=False, state="complete")
+        print(full_content)
+        return
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''
-        chat_box.ai_say(Markdown("进行中", in_expander=True, expanded=True, title=prompt_data[0]["title"]))
+        chat_box.ai_say(Markdown("进行中", in_expander=True, expanded=True, title='结果输出'))
         for r in call_with_stream(compose_prompt(only_one["prompt"], user_input, [])):
             full_content += r
             chat_box.update_msg(full_content, streaming=True)
