@@ -2,7 +2,7 @@ from http import HTTPStatus
 from openai import OpenAI
 
 client = OpenAI(
-    api_key="empty",
+    api_key="sk-7336b609d03b4646acf0d874a6a95554",
     base_url="http://123.57.244.236:1742/v1",
 )
 

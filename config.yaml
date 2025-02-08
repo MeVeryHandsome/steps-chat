@@ -18,124 +18,120 @@ prompts:
   PROMPT_TEMPLATE_1:
     title: "调度指令生成"
     prompt: '
-# 1. 空调
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 空调   | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭空调 | 控制空调的开关状态                        |
-| 空调   | 温度设置  | `{"temperature": {"type": "integer", "minimum": 16, "maximum": 30}}` | 设置空调温度 | 设置空调的工作温度范围为16到30摄氏度      |
-| 空调   | 风速控制  | `{"fan_speed": {"type": "string", "enum": ["low", "medium", "high"]}}` | 设置风速   | 设置空调的风速为低、中、高档             |
-| 空调   | 模式切换  | `{"mode": {"type": "string", "enum": ["cool", "heat", "dry", "auto"]}}` | 切换工作模式 | 切换空调的工作模式（制冷、制热、除湿、自动） |
-| 空调   | 定时控制  | `{"timer": {"type": "integer", "minimum": 1, "maximum": 240}}` | 设置定时   | 设置空调定时关闭，最大240分钟            |
-
-# 2. 电视
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 电视   | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭电视 | 控制电视的开关状态                        |
-| 电视   | 音量调节  | `{"volume": {"type": "integer", "minimum": 0, "maximum": 100}}` | 设置音量   | 调节电视的音量大小，范围从0到100          |
-| 电视   | 频道切换  | `{"channel": {"type": "integer", "minimum": 1}}`      | 切换频道   | 切换电视的频道，参数为频道编号            |
-| 电视   | 源切换    | `{"source": {"type": "string", "enum": ["HDMI1", "HDMI2", "AV", "TV"]}}` | 切换输入源 | 切换电视的输入源（如HDMI、AV、电视等）     |
-| 电视   | 显示设置  | `{"brightness": {"type": "integer", "minimum": 0, "maximum": 100}, "contrast": {"type": "integer", "minimum": 0, "maximum": 100}}` | 调节亮度对比度 | 调节电视的亮度和对比度设置                |
-
-# 3. 热水器
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 热水器 | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭热水器 | 控制热水器的开关状态                      |
-| 热水器 | 温度设置  | `{"temperature": {"type": "integer", "minimum": 30, "maximum": 80}}` | 设置温度   | 设置热水器的温度范围为30到80摄氏度         |
-| 热水器 | 定时控制  | `{"timer": {"type": "integer", "minimum": 0, "maximum": 120}}` | 设置定时   | 设置热水器定时工作，单位为分钟，最大120分钟 |
-| 热水器 | 模式切换  | `{"mode": {"type": "string", "enum": ["normal", "quick", "eco"]}}` | 切换模式   | 切换热水器的工作模式（普通、快速、节能）   |
-
-# 4. 冰箱
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 冰箱   | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭冰箱 | 控制冰箱的开关状态                        |
-| 冰箱   | 温控设置  | `{"temperature": {"type": "integer", "minimum": -18, "maximum": 8}}` | 设置温度   | 设置冰箱的温度范围从-18到8摄氏度          |
-| 冰箱   | 模式切换  | `{"mode": {"type": "string", "enum": ["freezer", "fridge", "eco"]}}` | 切换工作模式 | 切换冰箱的工作模式（冷冻、冷藏、节能）     |
-| 冰箱   | 制冰控制  | `{"ice_maker": "boolean"}`                            | 开启/关闭制冰 | 控制冰箱制冰功能的开关                    |
-
-# 5. 灯光
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 灯光   | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭灯光 | 控制灯光的开关状态                        |
-| 灯光   | 亮度调节  | `{"brightness": {"type": "integer", "minimum": 0, "maximum": 100}}` | 调节亮度   | 调节灯光的亮度大小，范围从0到100          |
-| 灯光   | 色温调节  | `{"color_temperature": {"type": "integer", "minimum": 2000, "maximum": 6500}}` | 设置色温   | 设置灯光的色温，范围从2000到6500K         |
-| 灯光   | 模式切换  | `{"mode": {"type": "string", "enum": ["warm", "cool", "natural"]}}` | 切换光模式 | 切换灯光的光模式（温暖、冷光、自然光）    |
-| 灯光   | 定时控制  | `{"timer": {"type": "integer", "minimum": 1, "maximum": 240}}` | 设置定时   | 设置灯光定时关闭，最大240分钟            |
-
-# 6. 音响
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 音响   | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭音响 | 控制音响的开关状态                        |
-| 音响   | 音量调节  | `{"volume": {"type": "integer", "minimum": 0, "maximum": 100}}` | 调节音量   | 调节音响的音量大小，范围从0到100          |
-| 音响   | 音效设置  | `{"sound_mode": {"type": "string", "enum": ["stereo", "surround", "bass"]}}` | 设置音效模式 | 设置音响的音效模式（立体声、环绕声、低音） |
-| 音响   | 蓝牙连接  | `{"bluetooth": {"type": "boolean"}}`                 | 启用/禁用蓝牙 | 启动或关闭音响的蓝牙功能                  |
-| 音响   | 声道切换  | `{"channel": {"type": "string", "enum": ["left", "right", "center"]}}` | 切换声道   | 切换音响的声道（左、右、中）              |
-
-# 7. 洗衣机
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 洗衣机 | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭洗衣机 | 控制洗衣机的开关状态                      |
-| 洗衣机 | 水温调节  | `{"temperature": {"type": "integer", "minimum": 20, "maximum": 90}}` | 设置水温   | 设置洗衣机的水温范围从20到90摄氏度        |
-| 洗衣机 | 洗涤模式  | `{"mode": {"type": "string", "enum": ["normal", "delicate", "quick"]}}` | 设置洗涤模式 | 设置洗衣机的洗涤模式（普通、精致、快速）   |
-| 洗衣机 | 转速调节  | `{"spin_speed": {"type": "integer", "minimum": 600, "maximum": 1600}}` | 设置转速   | 设置洗衣机的转速范围从600到1600转/分钟    |
-| 洗衣机 | 定时控制  | `{"timer": {"type": "integer", "minimum": 1, "maximum": 240}}` | 设置定时   | 设置洗衣机的定时功能，最大240分钟         |
-
-# 8. 扫地机
-| 系统   | 模块      | 参数                                                | 功能       | 功能描述                                  |
-|--------|-----------|-----------------------------------------------------|------------|-------------------------------------------|
-| 扫地机 | 开关控制  | `{"power": "boolean"}`                               | 开启/关闭扫地机 | 控制扫地机的开关状态                      |
-| 扫地机 | 清扫模式  | `{"mode": {"type": "string", "enum": ["auto", "edge", "spot"]}}` | 设置清扫模式 | 设置扫地机的清扫模式（自动、边缘、局部清扫）|
-| 扫地机 | 启动定时  | `{"timer": {"type": "integer", "minimum": 1, "maximum": 180}}` | 设置定时    | 设置扫地机工作时长，单位为分钟（1至180分钟）|
-| 扫地机 | 强力清扫  | `{"power_mode": {"type": "boolean"}}`                | 启动强力清扫 | 启动或关闭扫地机的强力清扫模式            |
-| 扫地机 | 清扫路径  | `{"path": {"type": "string", "enum": ["zigzag", "random", "linear"]}}` | 设置清扫路径 | 设置扫地机的清扫路径（之字形、随机、线性）|
-     假设你是智能家居调度程序员，当用户输入行为后，你需要根据实际情况为他生成调度指令json。
-     当前为示例1，仅供参考：
-     用户行为：开启音响，并将音量调节为30，适合背景音。
-     调度指令：```json
-     [{
-     "system": "音响",
-     "module": "开关控制",
-     "parameters": {
-       "power": true
-     }
-   },
-   {
-     "system": "音响",
-     "module": "音量调节",
-     "parameters": {
-       "volume": 30
-     }
-   }]```
-     当前为示例2，仅供参考：
-     用户行为：开启灯光，调节亮度为70，并设置色温为4000K（自然光），光模式为自然光。
-     调度指令：```json
-     [{
-     "system": "灯光",
-     "module": "开关控制",
-     "parameters": {
-       "power": true
-     }
-   },
-   {
-     "system": "灯光",
-     "module": "亮度调节",
-     "parameters": {
-       "brightness": 70
-     }
-   },
-   {
-     "system": "灯光",
-     "module": "色温调节",
-     "parameters": {
-       "color_temperature": 4000
-     }
-   },
-   {
-     "system": "灯光",
-     "module": "模式切换",
-     "parameters": {
-       "mode": "natural"
-     }
-   }]```
-  上面是参考内容，请你根据以下用户行为完成调度指令！
-  用户行为：{question}
-  调度指令：'
+    你是一名武装直升机程序员，以下是武装直升机接口表格，请你根据以下表格对用户提出的要求编写出调度json。
+| **系统** | **功能**          | **参数**                                                                                                                                                                       | **功能描述**                                                                                      |
+|--------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| 飞行控制系统     | 起飞命令           | `{ "id": "string", "takeoff_altitude": "number", "takeoff_speed": "number" }`                                                                                                 | 发出起飞命令，指示直升机按指定高度和速度进行起飞。                                                    |
+| 飞行控制系统     | 降落命令           | `{ "id": "string", "landing_altitude": "number", "landing_speed": "number" }`                                                                                                 | 发出降落命令，指示直升机以指定高度和速度执行安全降落。                                                  |
+| 飞行控制系统 | 设置飞行速度         | `{ "id": "string", "speed": "float" }`                                                                                                                             | 调整武装直升机的飞行速度以满足任务需求。                            |
+| 飞行控制系统 | 控制飞行高度       | `{ "id": "string", "altitude": "number" }`                                                                                                                               | 调整直升机飞行的高度，确保战术需求与任务需求的协调。                                                                |
+| 飞行控制系统   | 改变飞行方向         | `{ "id": "string", "direction": "string", "angle": "float" }`                                                                                 | 调整飞行器的飞行方向，指定飞行角度和偏航控制，执行快速转向或规避动作。                           |
+| 飞行控制系统 | 控制飞行姿态         | `{ "id": "string", "pitch": "float", "roll": "float", "yaw": "float" }`                                                                                             | 控制武装直升机的俯仰、滚转与偏航角度，确保战术飞行稳定。                  |
+| 飞行控制系统      | 控制飞行模式        | `{ "id": "string", "flight_mode": "string" }`                                                                                                           | 切换飞行模式（如巡航模式、机动模式、垂直起降模式等），调整直升机的飞行性能以适应不同战术需求。                                           |
+| 飞行控制系统 | 飞行路径规划       | `{ "current_position": {"latitude": "number", "longitude": "number"}, "destination": {"latitude": "number", "longitude": "number"}, "speed": "number", "altitude": "number" }` | 基于当前飞行位置和目标位置，计算最优飞行路径，考虑速度、飞行高度、天气、障碍物等因素。                                       |
+| 武器系统   | 武器发射          | `{ "weapon_type": "string", "target": {"latitude": "number", "longitude": "number"}, "fire_mode": "string" }`                                         | 根据目标信息，发射指定的武器类型，确保目标准确性与武器效能。                                                                |
+| 武器系统       | 改变火力模式      | `{ "id": "string", "fire_mode": "string" }`                                                                                                 | 切换武器系统的火力模式（如单发、连射等），优化武器使用效果，满足战术要求。                                          |
+| 武器系统         | 启动武器瞄准系统   | `{ "weapon_type": "string", "target_id": "string", "target_position": {"latitude": "number", "longitude": "number"} }`                               | 启动武器系统的瞄准模块，锁定指定目标并为发射做准备。                                                    |
+| 武器系统         | 切换武器类型       | `{ "id": "string", "weapon_type": "string" }`                                                                                                          | 切换武器类型（如从导弹切换到机枪），满足战术需求的变化。                                               |
+| 导航系统   | 目标追踪与锁定    | `{ "target_id": "string", "target_position": {"latitude": "number", "longitude": "number"} }`                                                         | 通过雷达或传感器获取目标位置，对目标进行追踪并自动锁定，为武器系统提供精准目标。                                          |
+| 导航系统         | 激活自动导航       | `{ "id": "string", "destination": {"latitude": "number", "longitude": "number"}, "altitude": "number", "speed": "number" }`                                                 | 激活自动导航功能，直升机根据目标位置自动规划飞行路径，并按指定速度和高度航行。                        |
+| 导航系统         | 定向导航             | `{ "id": "string", "direction": "string", "distance": "number", "speed": "number", "altitude": "number" }`                                                                                                                     | 按指定方向和距离导航，保持稳定速度和高度。                                                                          |
+| 导航系统         | 地面坐标导航         | `{ "id": "string", "latitude": "number", "longitude": "number", "altitude": "number", "speed": "number" }`                                                                                                                     | 指定地面坐标，导航直升机到达指定地点，同时保证飞行速度和高度的安全。                                              |
+| 雷达系统       | 启动雷达扫描         | `{ "id": "string", "scan_type": "string", "frequency": "number" }`                                                                             | 启动雷达系统进行扫描，选择适当的扫描模式和频率，确保目标的探测能力。                             |
+| 雷达系统       | 停止雷达扫描         | `{ "id": "string" }`                                                                                                                           | 停止雷达扫描，切换到静止状态，减少电力消耗并避免干扰。                                          |
+| 雷达系统         | 扫描空域           | `{ "id": "string", "scan_area": {"latitude_min": "number", "longitude_min": "number", "latitude_max": "number", "longitude_max": "number"}, "scan_duration": "number" }`   | 在指定空域范围内启动雷达扫描，扫描持续时间可以调整。                                                    |
+| 雷达系统         | 目标识别           | `{ "target_position": {"latitude": "number", "longitude": "number"}, "target_type": "string" }`                                                     | 根据雷达扫描数据识别目标，提供目标类型与位置的反馈，帮助进一步操作。                                 |
+| 通信系统      | 发出战术指令       | `{ "id": "string", "target_id": "string", "command": "string" }`                                                                                                     | 向指定目标或编队下达战术指令，如进攻、撤退等。                                                     |
+| 通信系统      | 接收战术指令       | `{ "id": "string", "command": "string" }`                                                                                                                           | 接收来自指挥中心或其他单位的战术指令，执行相关操作。                                                |
+| 通信系统      | 启动加密通信       | `{ "id": "string", "encryption_key": "string" }`                                                                                                                                            | 启动加密通信通道，确保战场通信的安全性与保密性。                                                    |
+| 通信系统       | 切换频率         | `{ "id": "string", "frequency": "number" }`                                                                                                                       | 调整通信系统的频率以避开干扰或保证与其他系统的有效连接。                                                    |
+| 安全监控系统    | 数据记录与上传    | `{ "id": "string", "data": {"flight_data": "string", "sensor_readings": "string", "status_reports": "string"} }`                                                                        | 将飞行过程中实时采集的数据上传至远程监控中心，供地面指挥进行分析。                                          |
+| 安全监控系统    | 异常警报与响应    | `{ "id": "string", "alarm_type": "string", "alarm_data": "string" }`                                                                                                                   | 系统检测到异常时触发警报，进行响应动作，如自动减速或调整飞行高度。                                          |
+| 目标侦察系统    | 启动红外侦察      | `{ "id": "string", "sensor_type": "infrared", "target_position": {"latitude": "number", "longitude": "number"}, "sensitivity": "number" }`                                              | 启动红外传感器进行侦察，定位潜在目标并提供实时反馈。                                                       |
+| 目标侦察系统    | 启动光学侦察      | `{ "id": "string", "sensor_type": "optical", "target_position": {"latitude": "number", "longitude": "number"}, "zoom_level": "number" }`                                               | 启动光学传感器进行高精度目标侦察，使用不同的变焦级别来获取目标信息。                                           |
+| 目标侦察系统    | 执行自动扫描      | `{ "id": "string", "scan_area": {"latitude_min": "number", "longitude_min": "number", "latitude_max": "number", "longitude_max": "number"}, "scan_type": "string" }`                     | 执行自动扫描任务，扫描指定区域并分析是否有目标物体。                                                       |
+| 目标侦察系统    | 识别目标特征      | `{ "id": "string", "target_position": {"latitude": "number", "longitude": "number"}, "feature": "string" }`                                                                              | 对目标进行特征识别，如类型、大小、热辐射等，为武器系统提供锁定信息。                                         |
+    示例1：
+    用户请求：武装直升机起飞、前往目标区域并执行光学侦察、武器发射、然后降落。
+    调度结果：```json
+  [{
+  "flight_control": {
+    "takeoff": {
+      "id": "helicopter_001",
+      "takeoff_altitude": 500,
+      "takeoff_speed": 120
+    },
+    "flight_path": {
+      "current_position": {"latitude": 30.5, "longitude": 114.3},
+      "destination": {"latitude": 30.7, "longitude": 114.5},
+      "speed": 180,
+      "altitude": 1000
+    },
+    "control_flight_mode": {
+      "id": "helicopter_001",
+      "flight_mode": "巡航模式"
+    }
+  },
+  "target_recognition": {
+    "optical_scout": {
+      "id": "helicopter_001",
+      "sensor_type": "optical",
+      "target_position": {"latitude": 30.7, "longitude": 114.5},
+      "zoom_level": 3
+    }
+  },
+  "weapon_system": {
+    "weapon_fire": {
+      "weapon_type": "导弹",
+      "target": {"latitude": 30.7, "longitude": 114.5},
+      "fire_mode": "单发"
+    }
+  },
+  "flight_control": {
+    "landing": {
+      "id": "helicopter_001",
+      "landing_altitude": 10,
+      "landing_speed": 50
+    }
+  }
+}]```
+    示例2：
+    用户请求：直升机控制飞行姿态，调整高度与速度，并且在飞行过程中切换武器类型，从机枪切换为导弹准备打击空中目标。
+    调度结果：```json
+  [{
+    "system": "飞行控制系统",
+    "function": "控制飞行姿态",
+    "params": {
+      "id": "helicopter_001",
+      "pitch": 5.0,
+      "roll": 0.0,
+      "yaw": 90.0
+    }
+  },
+  {
+    "system": "飞行控制系统",
+    "function": "控制飞行高度",
+    "params": {
+      "id": "helicopter_001",
+      "altitude": 5000
+    }
+  },
+  {
+    "system": "飞行控制系统",
+    "function": "设置飞行速度",
+    "params": {
+      "id": "helicopter_001",
+      "speed": 220.5
+    }
+  },
+  {
+    "system": "武器系统",
+    "function": "切换武器类型",
+    "params": {
+      "id": "helicopter_001",
+      "weapon_type": "missile"
+    }
+  }]```
+  以上为示例，请勿重复，请你根据下面的真实用户请求进行调度结果的设计。
+    用户请求：{question}
+    调度结果：'

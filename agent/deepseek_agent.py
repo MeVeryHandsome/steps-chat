@@ -1,13 +1,13 @@
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-1c7148b9e750476a986b1fd33e261642", base_url="https://api.deepseek.com")
+client = OpenAI(api_key="sk-1c7148b9e750476a986b1fd33e261642", base_url="http://123.57.244.236:1741/v1")
 
 def call_with_messages(prompt):
     messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
                 {'role': 'user', 'content': prompt}]
     print("\n正在发起单次提问请求")
     response = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-1.5B",
         messages=messages,
         stream=False
     )
@@ -24,7 +24,7 @@ def call_with_stream(prompt):
     messages = [{'role': 'system', 'content': '你是行至智能公司的军事领域大模型'},
                 {'role': 'user', 'content': prompt}]
     responses = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek-1.5B",
         messages=messages,
         stream=True
     )
