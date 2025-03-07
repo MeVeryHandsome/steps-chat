@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+import requests
 import streamlit as st
 from streamlit_chatbox import *
 from utils.config_utils import header, prompt_data, call_with_messages, call_with_stream, model
@@ -81,6 +81,26 @@ def answer_by_steps(user_input):
         chat_box.update_msg(full_content, element_index=1,  streaming=False, state="complete")
         print(full_content)
         return
+    elif model.upper() == "CM":
+        # 构建请求数据
+        data = {
+            "oral_command": user_input,
+            "top_k": 10
+        }
+
+        # 发送请求
+        response = requests.post("http://123.57.244.236:17387/get_candidate_command", json=data)
+        instruct_message = response.json()["response"]["instruct_message"]
+
+        full_content = ''
+        chat_box.ai_say(Markdown("进行中", in_expander=True, expanded=True, title='结果输出'))
+        for r in call_with_stream(instruct_message):
+            full_content += r
+            chat_box.update_msg(full_content, streaming=True)
+        chat_box.update_msg(full_content, streaming=False, state="complete")
+        print(full_content)
+        return
+        
     else:
         only_one = prompt_list.pop(-1)
         full_content = ''

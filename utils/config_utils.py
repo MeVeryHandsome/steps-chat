@@ -20,3 +20,5 @@ elif model.upper() == "XINGZHI":
     from agent.xingzhi_agent import call_with_stream, call_with_messages
 elif model.upper() == "DEEPSEEK":
     from agent.deepseek_agent import call_with_stream, call_with_messages
+elif model.upper() == "CM":
+    from agent.command_match import call_with_stream, call_with_messages

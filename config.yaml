@@ -8,7 +8,7 @@ version: "Beta"
 main_screen_icon: "chat"
 
 # 选择模型类型(大小写均可)，支持"GLM"和"QWEN"，配置"FAKE"可用于测试
-model: "deepseek"
+model: "cm"
 
 # 界面标题
 header: "平台控制demo-XThink-1.5B"
